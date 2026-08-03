@@ -1,5 +1,5 @@
 /*
-*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< LCD_program.c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CLCD_program.c >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 *   
 *    Author : Mohammed Omera
 *	 Layer : HAL	
@@ -7,467 +7,340 @@
 *
 */
 
-/* Include Header Files */
-#include "STD_TYPES.h"
-#include "BIT_MATH.h"
-#include "DIO_Interface.h"
+/*
+ *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    CLCD_program.c    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ *
+ *  Author : Mahmoud Karem Zamel
+ *  Layer  : HAL
+ *  SWC    : CLCD
+ *
+ */
+/***************************************************************************************/
+#define F_CPU 8000000UL
 #include <util/delay.h>
 
-#include "LCD_Interface.h"
-#include "LCD_Private.h"
-#include "LCD_Config.h"
+#include "STD_TYPES.h"
+#include "BIT_MATH.h"
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidInit                                                          */
-/* Description : Initializes the LCD                                                     */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidInit(void)
-{
-	#if defined LCD_8BIT_MODE
-	
-	/* Configure Control Pins as Output */
-	DIO_voidSetPortDirection(LCD_DATA_PORT, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, RS_PIN, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, RW_PIN, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, E_PIN, OUTPUT);
+#include "DIO_interface.h"
 
-	_delay_ms(35);
+#include "CLCD_interface.h"
+#include "CLCD_private.h"
+#include "CLCD_config.h"
+#include "CLCD_extrachar.h"
 
-	/* Function Set Command */
-	LCD_voidSendCommand(FS_8BIT_2LINES_5x7);
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function Apply initialization sequence for LCD module
+* Parameters : nothing
+* return : nothing
+*/
+void CLCD_voidInit        ( void ){
+
+
+
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      8 Bits Mode       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	#if   CLCD_MODE == 8
+
+	// 1- must wait more than 30 ms before any action (VDD rises to 4.5 v)
+	_delay_ms(50);
+
+	// All Pins as OutPut pins
+	DIO_enumSetPortDirection ( CLCD_DATA_PORT    , DIO_PORT_OUTPUT           );
+	DIO_enumSetPinDirection  ( CLCD_CONTROL_PORT , CLCD_RS , DIO_PIN_OUTPUT  );
+	DIO_enumSetPinDirection  ( CLCD_CONTROL_PORT , CLCD_RW , DIO_PIN_OUTPUT  );
+	DIO_enumSetPinDirection  ( CLCD_CONTROL_PORT , CLCD_EN , DIO_PIN_OUTPUT  );
+
+	/* Return cursor to the first position on the first line  */
+	CLCD_voidSendCommand(lcd_Home);
 	_delay_ms(1);
 
-	/* Display ON, Cursor ON */
-	LCD_voidSendCommand(DIS_ON_CURSOR_ON);
+	/*FUNCTION SET Command : 2 lines , 5*8 font size */
+	CLCD_voidSendCommand( EIGHT_BITS ); // 8 Bit Mode ==> 0x38
+	_delay_ms(1); // wait more than 39 Ms
+
+	/* DISPLAY & Cursor (ON / OFF) Control */
+	CLCD_voidSendCommand( lcd_DisplayOn_CursorOff );
 	_delay_ms(1);
 
-	/* Clear Display and Reset Cursor */
-	LCD_voidClearDisplay();  // Clears display & ensures cursor at (0,0)
-	_delay_ms(2);
+	/* DISPLAY CLEAR */
+	CLCD_voidClearScreen();
 
-	/* Entry Mode Set */
-	LCD_voidSendCommand(ENTRY_MODE_INCREASE_NO_SHIFT);
-	_delay_ms(1);
-	
-	#elif defined LCD_4BIT_MODE
-	#if   defined LCD_4BIT_HIGHT_NIBBLE
-	
-	DIO_voidSetNibbleDirection(LCD_DATA_PORT,HIGH_NIBBLE,OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, RS_PIN, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, RW_PIN, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, E_PIN, OUTPUT);
-	
-	_delay_ms(35);
-	
-	/* Function Set Command */
-	LCD_voidSendCommand(0x02);
-	_delay_ms(1);
-	LCD_voidSendCommand(FS_4BIT_2LINES_5x7);
-	_delay_ms(1);
-
-	/* Display ON, Cursor ON */
-	LCD_voidSendCommand(DIS_ON_CURSOR_ON);
-	_delay_ms(1);
-	
-	/* Clear Display and Reset Cursor */
-	LCD_voidClearDisplay();  // Clears display & ensures cursor at (0,0)
-	_delay_ms(2);
-
-	/* Entry Mode Set */
-	LCD_voidSendCommand(ENTRY_MODE_INCREASE_NO_SHIFT);
-	_delay_ms(1);
-	
-	#elif defined LCD_4BIT_LOW_NIBBLE
-	
-	DIO_voidSetNibbleDirection(LCD_DATA_PORT,LOW_NIBBLE,OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, RS_PIN, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, RW_PIN, OUTPUT);
-	DIO_voidSetPinDirection(LCD_CONTROL_PORT, E_PIN, OUTPUT);
-	
-	_delay_ms(35);
-
-	
-	/* Function Set Command */
-	LCD_voidSendCommand(0x02);
-	_delay_ms(1);
-	LCD_voidSendCommand(FS_4BIT_2LINES_5x7);
+	/* ENTRY MODE  SET*/
+	CLCD_voidSendCommand( lcd_EntryMode );
 	_delay_ms(1);
 
 
-	/* Display ON, Cursor ON */
-	LCD_voidSendCommand(DIS_ON_CURSOR_OFF);
+
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      4 Bits Mode       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	#elif   CLCD_MODE == 4
+
+	// 1- must wait more than 30 ms before any action (VDD rises to 4.5 v)
+	_delay_ms(50);
+	DIO_enumSetPinDirection      (CLCD_DATA_PORT,DIO_PIN4,DIO_PIN_OUTPUT);
+	DIO_enumSetPinDirection      (CLCD_DATA_PORT,DIO_PIN5,DIO_PIN_OUTPUT);
+	DIO_enumSetPinDirection      (CLCD_DATA_PORT,DIO_PIN6,DIO_PIN_OUTPUT);
+	DIO_enumSetPinDirection      (CLCD_DATA_PORT,DIO_PIN7,DIO_PIN_OUTPUT);
+	DIO_enumSetPinDirection  ( CLCD_CONTROL_PORT , CLCD_RS , DIO_PIN_OUTPUT  );
+	DIO_enumSetPinDirection  ( CLCD_CONTROL_PORT , CLCD_RW , DIO_PIN_OUTPUT  );
+	DIO_enumSetPinDirection  ( CLCD_CONTROL_PORT , CLCD_EN , DIO_PIN_OUTPUT  );
+
+
+
+	/*return home*/
+	CLCD_voidSendCommand( lcd_Home );
+	_delay_ms(30);
+
+	/*FUNCTION SET Command*/
+	CLCD_voidSendCommand( FOUR_BITS ); // 4 Bit Mode
 	_delay_ms(1);
 
-	/* Clear Display and Reset Cursor */
-	LCD_voidClearDisplay();  // Clears display & ensures cursor at (0,0)
-	_delay_ms(2);
-
-	/* Entry Mode Set */
-	LCD_voidSendCommand(ENTRY_MODE_INCREASE_NO_SHIFT);
+	/* DISPLAY & Cursor (ON / OFF) Control */
+	CLCD_voidSendCommand( lcd_DisplayOn_CursorOff );
 	_delay_ms(1);
+
+	/* DISPLAY CLEAR */
+	CLCD_voidClearScreen();
+
+	/* ENTRY MODE  Set*/
+	CLCD_voidSendCommand( lcd_EntryMode );
+	_delay_ms(1);
+
+
 	#endif
-	#endif
-	
-	
+
+
+
+
 }
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidSendCommand                                                   */
-/* Description : Sends a command to the LCD                                              */
-/* Argument : Copy_u8Command (Command to send)                                           */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidSendCommand(u8 Copy_u8Command)
-{
-	#if defined LCD_8BIT_MODE
-	
-	/* RS=0 for Command */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, LOW);
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function send data to the port which is defined in config.h
+* Parameters :
+            => Copy_u8Data --> Data that you want to display (for every pixel )
+* return : nothing
+*/
+void CLCD_voidSendData    ( u8 Copy_u8Data ){
 
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      8 Bits Mode       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	#if   CLCD_MODE == 8
 
-	/* Send Command */
-	DIO_voidSetPortValue(LCD_DATA_PORT, Copy_u8Command);
+	DIO_enumSetPortValue ( CLCD_DATA_PORT    , Copy_u8Data        );
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RS , DIO_PIN_HIGH );
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RW , DIO_PIN_LOW  );
+	CLCD_voidSendFallingEdge();
 
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	#elif defined LCD_4BIT_MODE
-	#if   defined LCD_4BIT_HIGHT_NIBBLE
-	
-	/* RS=0 for Command */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, LOW);
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      4 Bits Mode       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	#elif   CLCD_MODE == 4
 
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RS , DIO_PIN_HIGH );
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RW , DIO_PIN_LOW  );
+	DIO_voidWriteHighNibbles (CLCD_DATA_PORT ,(Copy_u8Data>>4));            // send the most 4 bits of data to high nibbles
+	CLCD_voidSendFallingEdge();
+	DIO_voidWriteHighNibbles (CLCD_DATA_PORT ,Copy_u8Data);               // send the least 4 bits of data to high nibbles
+	CLCD_voidSendFallingEdge();
 
-	/* Send Command HIGHT 4*/
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,HIGH_NIBBLE, Copy_u8Command >> 4);
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	///////////////////////////////////////////////////////////////
-	
-	/* RS=0 for Command */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, LOW);
-
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
-
-	/* Send Command  LOW 4*/
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,HIGH_NIBBLE, Copy_u8Command );
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	#elif defined LCD_4BIT_LOW_NIBBLE
-	
-	/* RS=0 for Command */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, LOW);
-
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
-
-	/* Send Command HIGHT 4 */
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,LOW_NIBBLE, Copy_u8Command >> 4);
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	///////////////////////////////////////////////////////////////
-	
-	/* RS=0 for Command */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, LOW);
-
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
-
-	/* Send Command LOW 4*/
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,LOW_NIBBLE, Copy_u8Command );
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
 	#endif
-	#endif
-	
+
+	_delay_ms(1);
+
 }
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidWriteChar                                                     */
-/* Description : Writes a character to the LCD                                           */
-/* Argument : Copy_u8Char (Character to display)                                         */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidWriteChar(u8 Copy_u8Char)
-{
-	#if defined LCD_8BIT_MODE
-	
-	/* RS=1 for Data */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, HIGH);
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function Interface to send the configuration commands to the LCD Driver
+* Parameters :
+            => Copy_u8Command --> Command number
+* return : nothing
+*Hint : RS pin Mode is the difference between this function and the previous (CLCD_voidSendData)
+*/
+void CLCD_voidSendCommand ( u8 Copy_u8Command ){
 
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      8 Bits Mode       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	#if   CLCD_MODE == 8
 
-	/* Send Data */
-	DIO_voidSetPortValue(LCD_DATA_PORT, Copy_u8Char);
+	DIO_enumSetPortValue ( CLCD_DATA_PORT    , Copy_u8Command     );
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RS , DIO_PIN_LOW  );
+	// RW always connect to GND to Write
+	DIO_enumSetPinValue          (CLCD_CONTROL_PORT,CLCD_RW , DIO_PIN_LOW    );
+	CLCD_voidSendFallingEdge();
 
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	#elif defined LCD_4BIT_MODE
-	#if   defined LCD_4BIT_HIGHT_NIBBLE
-	
-	/* RS=1 for Data */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, HIGH);
+	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<      4 Bits Mode       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	#elif   CLCD_MODE == 4
 
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RS , DIO_PIN_LOW  );
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_RW , DIO_PIN_LOW  );
+	DIO_voidWriteHighNibbles (CLCD_DATA_PORT ,Copy_u8Command>>4);             // send the most 4 bits of data to high nibbles
+	CLCD_voidSendFallingEdge();
+	DIO_voidWriteHighNibbles (CLCD_DATA_PORT ,Copy_u8Command);                // send the least 4 bits of data to high nibbles
+	CLCD_voidSendFallingEdge();
 
-	/* Send Data HIGHT 4 */
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,HIGH_NIBBLE, Copy_u8Char >> 4);
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	///////////////////////////////////////////////////////////////
-	
-	/* RS=1 for Data */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, HIGH);
-
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
-
-	/* Send Data LOW 4*/
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,HIGH_NIBBLE, Copy_u8Char );
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	#elif defined LCD_4BIT_LOW_NIBBLE
-	
-	/* RS=1 for Data */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, HIGH);
-
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
-
-	/* Send Data HIGHT 4 */
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,LOW_NIBBLE, Copy_u8Char >> 4);
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
-	///////////////////////////////////////////////////////////////
-	
-	/* RS=1 for Data */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RS_PIN, HIGH);
-
-	/* RW=0 for Write */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, RW_PIN, LOW);
-
-	/* Send Data LOW 4 */
-	DIO_voidSetNibbleValue(LCD_DATA_PORT,LOW_NIBBLE, Copy_u8Char );
-
-	/* Enable Pulse */
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, HIGH);
-	_delay_ms(2);
-	DIO_voidSetPinValue(LCD_CONTROL_PORT, E_PIN, LOW);
-	_delay_ms(2);
-	
 	#endif
-	#endif
+
+	_delay_ms(1);
+
 }
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidWriteString                                                   */
-/* Description : Writes a string to the LCD                                              */
-/* Argument : *Copy_u8Arr (Pointer to the string)                                        */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidWriteString(u8 *Copy_u8Arr)
-{
-	u8 i = 0;
-	while (Copy_u8Arr[i] != '\0')
-	{
-		LCD_voidWriteChar(Copy_u8Arr[i]);
-		i++;
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function send string to the port which is defined in config.h
+* Parameters :
+            => * Copy_u8ptrString  --> Pointer to the string
+* return : nothing
+*/
+void CLCD_voidSendString  ( const u8 * Copy_u8ptrString ){
+
+	u8 LOC_u8Iterator = 0 ;
+
+	while( Copy_u8ptrString[LOC_u8Iterator] != '\0' ){
+
+		CLCD_voidSendData( Copy_u8ptrString[LOC_u8Iterator] );
+		LOC_u8Iterator++ ;
+
 	}
+
 }
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidWrite_u32Number                                               */
-/* Description : Writes an unsigned 32-bit number to the LCD                             */
-/* Argument : Copy_u32Number (Number to display)                                         */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidWrite_u32Number(u32 Copy_u32Number)
-{
-	u8 Arr[10];  // Maximum 10 digits
-	u8 i = 0;
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function send number to the port which is defined in config.h
+* Parameters :
+            => Copy_u64Number --> number that you want to display
+* return : nothing
+*/
+void CLCD_voidSendNumber   ( u64 Copy_u64Number    ){
 
-	if (Copy_u32Number == 0)
-	{
-		LCD_voidWriteChar('0');
-		return;
-	}
+	u64 LOC_u64Reversed = 1 ;
 
-	while (Copy_u32Number > 0)
-	{
-		Arr[i++] = (Copy_u32Number % 10) + '0';
-		Copy_u32Number /= 10;
-	}
+	if( Copy_u64Number == 0 ){ CLCD_voidSendData('0'); }
 
-	for (s8 j = i - 1; j >= 0; j--)
-	{
-		LCD_voidWriteChar(Arr[j]);
-	}
-}
+	else{
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidGoTo_XY                                                       */
-/* Description : Moves the cursor to a specific row and column                           */
-/* Arguments : Copy_u8Line (LINE_1, LINE_2), Copy_u8Position (0-15)                      */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidGoTo_XY(u8 Copy_u8Line, u8 Copy_u8Position)
-{
-	if (Copy_u8Line > LINE_2 || Copy_u8Position > 15)
-	{
-		return;
-	}
-	else
-	{
-		switch (Copy_u8Line)
-		{
-			case LINE_1: LCD_voidSendCommand(0x80 + Copy_u8Position); _delay_ms(100);  break;
-			case LINE_2: LCD_voidSendCommand(0xC0 + Copy_u8Position);  _delay_ms(100); break;
-			default: break;
+		while( Copy_u64Number != 0 ){
+
+			LOC_u64Reversed = ( LOC_u64Reversed * 10 ) + ( Copy_u64Number % 10 );
+			Copy_u64Number /= 10 ;
+
 		}
+		while( LOC_u64Reversed != 1 ){
+
+			CLCD_voidSendData( ( LOC_u64Reversed % 10 ) + 48 );
+			LOC_u64Reversed /= 10 ;
+
+		}
+
 	}
+
 }
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidDrawPattern                                                   */
-/* Description : Saves a custom pattern in CGRAM                                         */
-/* Arguments : Copy_u8Pattern_Number (0-7), *Copy_u8Arr_Pattern (Pattern data)           */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidDrawPattern(u8 Copy_u8Pattern_Address, u8 *Copy_u8Arr_Pattern)
-{
-	LCD_voidSendCommand(0x40 + (Copy_u8Pattern_Address * 8)); // Set CGRAM Address
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function set the curser position
+* Parameters :
+            => Copy_u8Row --> row number (CLCD_ROW_1 or CLCD_ROW_2)
+			=> Copy_u8Col --> column number (CLCD_COL_1 ... CLCD_COL_16)
+* return : nothing
+*Hint :-
+   In This function we send a command which =0b1xxxxxxx
+   MSB = 1  ===> refers that it is command to set cursor
+   xxxxxxx  ===> refers to AC ( Address Counter 7Bits / DDRAM Locations 128Location )
+*/
+void CLCD_voidSetPosition ( u8 Copy_u8Row , u8 Copy_u8Col ){
 
-	for (u8 i = 0; i < 8; i++)
+	u8 LOC_u8data ;
+
+	/* In These cases will set at (0,0) ==> if the user enter invalid location */
+	if(Copy_u8Row>2||Copy_u8Row<1||Copy_u8Col>16||Copy_u8Col<1)  //check
 	{
-		LCD_voidWriteChar(Copy_u8Arr_Pattern[i]);
+		LOC_u8data = lcd_SetCursor ;   // first location 
 	}
-	_delay_ms(100);
-}
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidShowPattern                                                  */
-/* Description : Displays a stored pattern on the LCD                                    */
-/* Arguments : Copy_u8Pattern (0-7), Copy_u8Line, Copy_u8Position                        */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidShowPattern(u8 Copy_u8Pattern, u8 Copy_u8Line, u8 Copy_u8Position)
-{
-	LCD_voidGoTo_XY(Copy_u8Line, Copy_u8Position); //  set DDRAM Address
-	LCD_voidWriteChar(Copy_u8Pattern);
-}
+	else if( Copy_u8Row == CLCD_ROW_1 ){
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidClearDisplay                                                  */
-/* Description : Clears the entire LCD display                                           */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidClearDisplay(void)
-{
-	LCD_voidSendCommand(CLEAR_DIS);
-	_delay_ms(2); 
-	LCD_voidSendCommand(RETURN_HOME);  // cursor returns to position 0
-	_delay_ms(2);
-}
+		LOC_u8data = ( ( lcd_SetCursor ) + ( Copy_u8Col - 1 ) );              //Row1 -> 0x80+col-1
 
-/*****************************************************************************************/
-/* Function Name : LCD_voidShiftLeft                                                     */
-/* Description : Shifts the entire LCD display left                                      */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidShiftLeft(void)
-{
-	LCD_voidSendCommand(DIS_SHIFT_LEFT);
-}
-
-/*****************************************************************************************/
-/* Function Name : LCD_voidShiftRight                                                    */
-/* Description : Shifts the entire LCD display right                                     */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidShiftRight(void)
-{
-	LCD_voidSendCommand(DIS_SHIFT_RIGHT);
-}
-
-/*****************************************************************************************/
-/* Function Name : LCD_voidClearGrid                                                     */
-/* Description : Clears a specific character position on the LCD                         */
-/* Arguments : Copy_u8Line, Copy_u8Position                                              */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidClearGrid(u8 Copy_u8Line, u8 Copy_u8Position)
-{
-	LCD_voidGoTo_XY(Copy_u8Line, Copy_u8Position);
-	LCD_voidWriteChar(' ');
-}
-
-/*****************************************************************************************/
-/* Function Name : LCD_voidClearLine                                                     */
-/* Description : Clears an entire line on the LCD                                        */
-/* Argument : Copy_u8Line                                                                */
-/* Return : void                                                                         */
-/*****************************************************************************************/
-void LCD_voidClearLine(u8 Copy_u8Line)
-{
-	for (u8 i = 0; i < 16; i++)
-	{
-		LCD_voidGoTo_XY(Copy_u8Line, i);
-		LCD_voidWriteChar(' ');
 	}
+
+	else if( Copy_u8Row == CLCD_ROW_2 ){
+
+		LOC_u8data = ( ( lcd_SetCursor ) + (64) + ( Copy_u8Col - 1 ) );       //Row2 -> 0xc0+col-1
+
+	}
+	CLCD_voidSendCommand ( LOC_u8data );
+	_delay_ms(1);
+
 }
 
-void LCD_voidRETURN_HOME ()
-{
-	LCD_voidSendCommand(RETURN_HOME);  // cursor returns to position 0
-	_delay_ms(100);
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function send extra char
+* Parameters :
+            => Copy_u8Row --> row number (CLCD_ROW_1 or CLCD_ROW_2)
+			=> Copy_u8Col --> column number (CLCD_COL_1 ... CLCD_COL_16)
+* return : nothing
+* Hint :-
+	Address Counter can refer to CGRAM and DDRAM
+*/
+void CLCD_voidSendExtraChar( u8 Copy_u8Row , u8 Copy_u8Col ){
+
+	u8 LOC_u8Iterator = 0 ;
+	/* 1- Go To CGRAM            */
+	CLCD_voidSendCommand( lcd_CGRAM );  // Make AC refers to the first Place/Address at CGRAM
+
+
+	/* 2- Draw Character in CGRAM        */
+	/* Hint : it will be copied to DDRAM automatically */
+	for( LOC_u8Iterator = 0 ; LOC_u8Iterator < sizeof(CLCD_u8ExtraChar) / sizeof(CLCD_u8ExtraChar[0]) ; LOC_u8Iterator++){
+
+		CLCD_voidSendData( CLCD_u8ExtraChar[LOC_u8Iterator] );
+
+	}
+
+
+	/* 3- Back (AC) To DDRAM          */
+	CLCD_voidSetPosition(Copy_u8Row,Copy_u8Col);
+
+
+	/* 4- Send Character Address */
+	for( LOC_u8Iterator = 0 ; LOC_u8Iterator < 8 ; LOC_u8Iterator++ ){
+
+		CLCD_voidSendData( LOC_u8Iterator );
+
+	}
+
 }
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function clear LCD
+* Parameters : nothing
+* return : nothing
+*/
+void CLCD_voidClearScreen(void)
+{
+	CLCD_voidSendCommand(lcd_Clear);
+	_delay_ms(10); //wait more than 1.53 ms
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+* Breif : This Function send a pulse (falling edge ) to Enable Pin
+* Parameters : nothing
+* return : nothing
+*
+* Hint : static Function to forbid calling it out this file
+*
+*/
+static void CLCD_voidSendFallingEdge(void)
+{
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_EN , DIO_PIN_HIGH );
+	_delay_ms(1);
+	DIO_enumSetPinValue  ( CLCD_CONTROL_PORT , CLCD_EN , DIO_PIN_LOW  );
+	_delay_ms(1);
+}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    END    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

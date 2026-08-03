@@ -1,5 +1,5 @@
 /*
-*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< LCD_config.h >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CLCD_config.h >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 *   
 *    Author : Mohammed Omera
 *	 Layer : HAL	
@@ -9,21 +9,50 @@
 
 
 /* File Gaurd by ifndef & endif */
-#ifndef LCD_CONFIG_H
-#define LCD_CONFIG_H
-
-#define LCD_4BIT_MODE
-//#define LCD_4BIT_HIGHT_NIBBLE
-#define LCD_4BIT_LOW_NIBBLE
-//#define LCD_8BIT_MODE
-
-/* LCD Hardware Configration with atmega PORTS & PINS */
-#define LCD_DATA_PORT            PORTA
-
-#define LCD_CONTROL_PORT         PORTA
-#define RS_PIN                   PIN6
-#define RW_PIN                   PIN5
-#define E_PIN                    PIN4
 
 
-#endif
+#ifndef CLCD_CONFIG_H_
+#define CLCD_CONFIG_H_
+
+/***************************************************************************************/
+/* LCD Mode */
+
+	/* Choose 8 for 8_bit connection*/
+
+
+#define CLCD_MODE  4
+
+
+/* D0 ------> D7 */
+
+/***************************************************************************************/
+
+
+#define CLCD_DATA_PORT      DIO_PORTA
+/* RS,RW,EN */
+#define CLCD_CONTROL_PORT   DIO_PORTB
+
+/***************************************************************************************/
+
+
+/*
+
+ Options:-
+ 	 1-DIO_PIN0
+ 	 2-DIO_PIN1
+ 	 3-DIO_PIN2
+ 	 4-DIO_PIN3
+ 	 5-DIO_PIN4
+ 	 6-DIO_PIN5
+ 	 7-DIO_PIN6
+ 	 8-DIO_PIN7
+
+ */
+#define CLCD_RS             DIO_PIN1
+#define CLCD_RW             DIO_PIN2
+#define CLCD_EN             DIO_PIN3
+
+/***************************************************************************************/
+
+
+#endif /* CLCD_CONFIG_H_ */

@@ -1,5 +1,5 @@
 /*
-*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< LCD_interface.h >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< CLCD_interface.h >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 *   
 *    Author : Mohammed Omera
 *	 Layer : HAL	
@@ -7,149 +7,70 @@
 *
 */
 
+#ifndef CLCD_INTERFACE_H_
+#define CLCD_INTERFACE_H_
 
-/* File Gaurd by ifndef & endif */
-#ifndef LCD_INTERFACE_H
-#define LCD_INTERFACE_H
-
-#define    LINE_1               0
-#define    LINE_2               1
-
-#define    PATTERN_0_Add        0b01000000    // address of First Byte at Sequence 0 at CGRAM            
-#define    PATTERN_1_Add        0b01001000    // address of First Byte at Sequence 1 at CGRAM            
-#define    PATTERN_2_Add        0b01010000    // address of First Byte at Sequence 2 at CGRAM
-#define    PATTERN_3_Add        0b01011000    // address of First Byte at Sequence 3 at CGRAM
-#define    PATTERN_4_Add        0b01100000    // address of First Byte at Sequence 4 at CGRAM
-#define    PATTERN_5_Add        0b01101000    // address of First Byte at Sequence 5 at CGRAM
-#define    PATTERN_6_Add        0b01110000    // address of First Byte at Sequence 6 at CGRAM
-#define    PATTERN_7_Add        0b01111000    // address of First Byte at Sequence 7 at CGRAM
-
-#define    PATTERN_0		0
-#define    PATTERN_1		1
-#define    PATTERN_2		2
-#define    PATTERN_3		3
-#define    PATTERN_4		4
-#define    PATTERN_5		5
-#define    PATTERN_6		6
-#define    PATTERN_7		7
+#include "CLCD_config.h" // to khow the mode
 
 
-/*==============================================================================================*/
-/**************************   LCD Functions Implementations     ************************/
-/*==============================================================================================*/
-/********************************** [1]  LCD_voidInit                  **************************/
-/********************************** [2]  LCD_voidWriteCommand          **************************/
-/********************************** [3]  LCD_voidWriteChar             **************************/
-/********************************** [4]  LCD_voidWriteString           **************************/
-/********************************** [5]  LCD_voidWrite_u32Number       **************************/
-/********************************** [6]  LCD_voidGoTo_XY               **************************/
-/********************************** [7]  LCD_voidDrawPattern           **************************/
-/********************************** [8] LCD_voidWritePattern           **************************/ 
-/********************************** [9]  LCD_voidClearDisplay          **************************/
-/********************************** [10]  LCD_voidClearGrid            **************************/
-/********************************** [11] LCD_voidClearLine             **************************/
-/********************************** [12] LCD_voidShiftLeft             **************************/
-/********************************** [13] LCD_voidShiftRight            **************************/
-/*==============================================================================================*/
+/***************************************************************************************/
+/********************************** Macros *********************************************/
+/***************************************************************************************/
 
 
-/*****************************************************************************************/
-/* Function Name : [1] LCD_voidInit                                                      */
-/* Description : Initialized the LCD                                                     */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidInit (void);
-/*****************************************************************************************/
-/* Function Name : [2]  LCD_voidWriteCommand                                             */
-/* Description : Send a Command to the LCD                                               */
-/* Fun. Argument1: Copy_u8Command                                                        */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidSendCommand ( u8 Copy_u8Command );
-/*****************************************************************************************/
-/* Function Name : [3] LCD_voidWriteChar                                                 */
-/* Description : Send a Data to the LCD   ( Character Data )                             */
-/* Fun. Argument1: Copy_u8Char                                                           */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidWriteChar ( u8 Copy_u8Char );
-/*****************************************************************************************/
-/* Function Name : [4] LCD_voidWriteString                                               */
-/* Description : Send a Data of String to the LCD                                        */
-/* Fun. Argument1: *Copy_u8Arr      ( String Data | array of character )                 */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidWriteString (u8 *Copy_u8Arr );
-/*****************************************************************************************/
-/* Function Name : [5] LCD_voidWrite_u32Number                                           */
-/* Description : Send a Long Number  to the LCD                                          */
-/* Fun. Argument1: Copy_u32Number     ( unsigned integer number )                        */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidWrite_u32Number ( u32 Copy_u32Number);
-/**********************************************************************************************/
-/* Function Name : [6] LCD_voidGoTo_XY                                                        */
-/* Description : Put the AC of DDRAM of LCD at Specifec position to display at this position  */
-/* Fun. Argument1: Copy_u8Line    { LINE_1 , LINE_2 }                                         */
-/* Fun. Argument2: Copy_u8Position    {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}                 */
-/* Fun. Return : void                                                                         */
-/**********************************************************************************************/
-void LCD_voidGoTo_XY ( u8 Copy_u8Line , u8 Copy_u8Position );
-/*************************************************************************************************************************/
-/* Function Name : [7] LCD_voidDrawPattern                                                                               */
-/* Description : Draw a Pattern and save it on PATTERN_NUMBER at CGRAM                                                   */
-/* Fun.Argument1: Copy_u8Pattern_Number{PATTERN_0,PATTERN_1,PATTERN_2,PATTERN_3,PATTERN_4,PATTERN_5,PATTERN_6,PATTERN_7} */
-/* Fun.Argument2: *Copy_u8Arr_Pattern { Address of array for Details of drawing }                                        */
-/* Fun. Return : void                                                                                                    */
-/*************************************************************************************************************************/
-void LCD_voidDrawPattern ( u8 Copy_u8Pattern_Address , u8 *Copy_u8Arr_Pattern );
-/*****************************************************************************************/
-/* Function Name : [8] LCD_voidShowPattern                                              */
-/* Description : Write a Pattern on the LCD at specific Line & Position                  */
-/* Fun. Argument1: Copy_u8Pattern {0,1,2,3,4,5,6,7}                                      */
-/* Fun. Argument2: Copy_u8Line { LINE_1 , LINE_2 }                                       */
-/* Fun. Argument3: Copy_u8Position { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 }             */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidShowPattern ( u8 Copy_u8Pattern , u8 Copy_u8Line , u8 Copy_u8Position );
-/*****************************************************************************************/
-/* Function Name : [9] LCD_voidClearDisplay                                              */
-/* Description : Clear all Display of LCD                                                */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidClearDisplay (void);
-/*****************************************************************************************/
-/* Function Name : [10] LCD_voidShiftLeft                                                */
-/* Description : Shift Left all Display of LCD                                           */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidShiftLeft (void);
-/*****************************************************************************************/
-/* Function Name : [11] LCD_voidShiftRight                                               */
-/* Description : Shift Right all Display of LCD                                          */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidShiftRight (void);
-/*****************************************************************************************/
-/* Function Name : [12] LCD_voidClearGrid                                                */
-/* Description : Clear Specific position on LCD                                          */
-/* Fun. Argument1: Copy_u8Line { LINE_1 , LINE_2 }                                       */
-/* Fun. Argument2: Copy_u8Position { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 }             */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidClearGrid ( u8 Copy_u8Line , u8 Copy_u8Position );
-/*****************************************************************************************/
-/* Function Name : [13] LCD_voidClearLine                                                */
-/* Description : Clear Specific LINE on LCD                                              */
-/* Fun. Argument1: Copy_u8Line { LINE_1 , LINE_2 }                                       */
-/* Fun. Return : void                                                                    */
-/*****************************************************************************************/
-void LCD_voidClearLine ( u8 Copy_u8Line );
-
-void LCD_voidRETURN_HOME ();
-
-
-
-
-
+/********/
+#if   CLCD_MODE == 4
+#define FOUR_BITS                     0x28          //4 bits mode initialization
+#elif CLCD_MODE == 8
+#define EIGHT_BITS                    0x38          //8 bits mode initialization (8-bit data, 2-line display, 5 x 7 font )
 #endif
+/********/
+
+#define lcd_DisplayOn_CursorOff       0x0c          // display on, cursor off, don't blink character 
+#define lcd_DisplayOn_CursorOn        0x0e          // display on, cursor on, don't blink character 
+#define lcd_DisplayOff_CursorOff      0x08          // turn display off
+#define lcd_Clear                     0x01          //replace all characters with ASCII 'space'  
+#define lcd_EntryMode                 0x06          // shift cursor from left to right on read/write
+#define lcd_Home                      0x02          // return cursor to first position on first line 
+#define lcd_CGRAM                     0x40          // the first Place/Address at CGRAM
+#define lcd_SetCursor                 0x80          // set cursor position
+#define lcd_FunctionReset             0x30          // reset the LCD
+
+
+/***************************************************************************************/
+
+
+#define CLCD_ROW_1   1
+#define CLCD_ROW_2   2
+
+#define CLCD_COL_1   1
+#define CLCD_COL_2   2
+#define CLCD_COL_3   3
+#define CLCD_COL_4   4
+#define CLCD_COL_5   5
+#define CLCD_COL_6   6
+#define CLCD_COL_7   7
+#define CLCD_COL_8   8
+#define CLCD_COL_9   9
+#define CLCD_COL_10  10
+#define CLCD_COL_11  11
+#define CLCD_COL_12  12
+#define CLCD_COL_13  13
+#define CLCD_COL_14  14
+#define CLCD_COL_15  15
+#define CLCD_COL_16  16
+
+/***************************************************************************************/
+
+void CLCD_voidInit                      ( void                                  );
+void CLCD_voidSendData                  ( u8 Copy_u8Data                        );
+void CLCD_voidSendCommand               ( u8 Copy_u8Commend                     );
+void CLCD_voidSendString                ( const u8 * Copy_u8ptrString           );
+void CLCD_voidSendNumber                ( u64 Copy_u64Number                    );
+void CLCD_voidSetPosition               ( u8 Copy_u8Row         , u8 Copy_u8Col );
+void CLCD_voidSendExtraChar             ( u8 Copy_u8Row         , u8 Copy_u8Col );
+void CLCD_voidClearScreen               (void                                   );
+
+/***************************************************************************************/
+
+#endif /* CLCD_INTERFACE_H_ */
