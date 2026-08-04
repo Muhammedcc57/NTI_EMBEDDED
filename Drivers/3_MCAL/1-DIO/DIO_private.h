@@ -1,11 +1,10 @@
 /*
-*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< DIO_private.h >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-*   
-*    Author : Mohammed Omera
-*	 Layer : MCAL	
-*
-*
-*/ 
+ *<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  DIO_private.h   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ *
+ *  Author : Mohammed Omera
+ *  Layer  : MCAL
+ *
+ */ 
 
 #ifndef _DIO_PRIVATE_H_
 #define _DIO_PRIVATE_H_
