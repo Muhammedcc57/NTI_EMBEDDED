@@ -1,0 +1,21 @@
+/*
+ * main.c
+ *
+ *  Created on: Aug 1, 2026
+ *      Author: Mohammed Omera
+ */
+#include <avr/io.h>
+
+int main(void)
+{
+    DDRA = 0xFF;   // PORTA Output (LEDs)
+    DDRB = 0x00;   // PORTB Input (DIP Switch)
+
+    while(1)
+    {
+        PORTA = PINB;
+    }
+
+    return 0;
+}
+
