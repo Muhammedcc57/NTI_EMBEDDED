@@ -7,87 +7,504 @@
 *
 */
 
-#include "Std_Types.h"
-#include "Bit_Math.h"
+#include "STD_TYPES.h"
+#include "BIT_MATH.h"
 
 #include "DIO_interface.h"
 #include "DIO_private.h"
-#include "DIO_config.h"
 
-void DIO_voidInitialization(void)
-{
-	DDRA = DIO_PORTA_DIRECTIONS;
-	DDRB = DIO_PORTB_DIRECTIONS;
-	DDRC = DIO_PORTC_DIRECTIONS;
-	DDRD = DIO_PORTD_DIRECTIONS;
-}
 
-void   DIO_voidSetPinDirection(u8 PortID, u8 PinID, u8 Direction)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<                          IO Pins                     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//---------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function set the direction of the Pin  (INPUT || OUTPUT)
+ * Parameters :
+  	  =>Copy_u8PORT --> Port Name [ DIO_PORTA ,	DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+  	  =>Copy_u8PIN  --> Pin Number [ DIO_PIN0 , DIO_PIN1 , DIO_PIN2 , DIO_PIN3 , DIO_PIN4 , DIO_PIN5 , DIO_PIN6 , DIO_PIN7 ]
+  	  =>Copy_u8Direction --> Pin Direction [ DIO_PIN_OUTPUT , DIO_PIN_INPUT ]
+ * return : its status
+ */
+DIO_ErrorStatus DIO_enumSetPinDirection    (u8 Copy_u8PORT , u8 Copy_u8PIN , u8 Copy_u8Direction ) 
 {
-	if(PortID < 4 && PinID < 8)
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	/* Make sure that the Port ID and Pin ID are in the valid range */
+	if ((Copy_u8PORT <= DIO_PORTD) && (Copy_u8PIN <= DIO_PIN7))
 	{
-		if(Direction == OUTPUT)
+		if ( Copy_u8Direction == DIO_PIN_OUTPUT )
 		{
-			switch(PortID)
+			/* Check on the Required PORT Number */
+			switch (Copy_u8PORT)
 			{
-				case PORTA: SET_BIT(DDRA, PinID); break;
-				case PORTB: SET_BIT(DDRB, PinID); break;
-				case PORTC: SET_BIT(DDRC, PinID); break;
-				case PORTD: SET_BIT(DDRD, PinID); break;
+			case DIO_PORTA: SET_BIT(DDRA_Register,Copy_u8PIN); break;
+			case DIO_PORTB: SET_BIT(DDRB_Register,Copy_u8PIN); break;
+			case DIO_PORTC: SET_BIT(DDRC_Register,Copy_u8PIN); break;
+			case DIO_PORTD: SET_BIT(DDRD_Register,Copy_u8PIN); break;
 			}
 		}
-		else if(Direction == INPUT)
+
+		else if ( Copy_u8Direction == DIO_PIN_INPUT )
 		{
-			switch(PortID)
+			/* Check on the Required PORT Number */
+			switch (Copy_u8PORT)
 			{
-				case PORTA: CLR_BIT(DDRA, PinID); break;
-				case PORTB: CLR_BIT(DDRB, PinID); break;
-				case PORTC: CLR_BIT(DDRC, PinID); break;
-				case PORTD: CLR_BIT(DDRD, PinID); break;
+			case DIO_PORTA: CLR_BIT(DDRA_Register,Copy_u8PIN); break;
+			case DIO_PORTB: CLR_BIT(DDRB_Register,Copy_u8PIN); break;
+			case DIO_PORTC: CLR_BIT(DDRC_Register,Copy_u8PIN); break;
+			case DIO_PORTD: CLR_BIT(DDRD_Register,Copy_u8PIN); break;
 			}
 		}
+
 		else
 		{
-			
-			/** thiselse for any valye not input or output */
+			LOC_enumState = DIO_NOK ;
+		}
+	}
+
+	else
+	{
+		LOC_enumState = DIO_NOK ;
+	}
+
+	return LOC_enumState ;
+
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function set the Value of the Pin  (HIGH || LOW)
+ * Parameters :
+  	  =>Copy_u8PORT --> Port Name [ DIO_PORTA ,	DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+  	  =>Copy_u8PIN  --> Pin Number [ DIO_PIN0 , DIO_PIN1 , DIO_PIN2 , DIO_PIN3 , DIO_PIN4 , DIO_PIN5 , DIO_PIN6 , DIO_PIN7 ]
+  	  =>Copy_u8Value --> Pin Direction [ DIO_PIN_HIGH , DIO_PIN_LOW ]
+ * return : its status
+ */
+DIO_ErrorStatus DIO_enumSetPinValue      (u8 Copy_u8PORT , u8 Copy_u8PIN , u8 Copy_u8Value ) 
+{
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	/* Make sure that the Port ID and Pin ID are in the valid range */
+	if ((Copy_u8PORT <= DIO_PORTD) && (Copy_u8PIN <= DIO_PIN7))
+	{
+		if (Copy_u8Value == DIO_PIN_HIGH)
+		{
+			/* Check on the Required PORT Number */
+			switch (Copy_u8PORT)
+			{
+			case DIO_PORTA: SET_BIT(PORTA_Register,Copy_u8PIN); break;
+			case DIO_PORTB: SET_BIT(PORTB_Register,Copy_u8PIN); break;
+			case DIO_PORTC: SET_BIT(PORTC_Register,Copy_u8PIN); break;
+			case DIO_PORTD: SET_BIT(PORTD_Register,Copy_u8PIN); break;
+			}
+
+		}
+
+		else if (Copy_u8Value == DIO_PIN_LOW)
+		{
+			/* Check on the Required PORT Number */
+			switch (Copy_u8PORT)
+			{
+			case DIO_PORTA: CLR_BIT(PORTA_Register,Copy_u8PIN); break;
+			case DIO_PORTB: CLR_BIT(PORTB_Register,Copy_u8PIN); break;
+			case DIO_PORTC: CLR_BIT(PORTC_Register,Copy_u8PIN); break;
+			case DIO_PORTD: CLR_BIT(PORTD_Register,Copy_u8PIN); break;
+			}
+		}
+
+		else
+		{
+			LOC_enumState = DIO_NOK ;
+		}
+	}
+
+	else
+	{
+		LOC_enumState = DIO_NOK ;
+	}
+
+	return LOC_enumState ;
+
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function Get the Value of the Pin
+ * Parameters :
+ 	  =>Copy_u8PORT --> Port Name [ DIO_PORTA ,	DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+  	  =>Copy_u8PIN  --> Pin Number [ DIO_PIN0 , DIO_PIN1 , DIO_PIN2 , DIO_PIN3 , DIO_PIN4 , DIO_PIN5 , DIO_PIN6 , DIO_PIN7 ]
+  	  => *Copy_PtrData  --> pointer to recieve the pin value
+ * return : its status and recieve Pin Value in pointer
+ */
+
+DIO_ErrorStatus DIO_enumGetPinValue          (u8 Copy_u8PORT, u8 Copy_u8PIN, u8 * Copy_PtrData   )
+{
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if ((Copy_u8PORT <= DIO_PORTD) && (Copy_u8PIN <= DIO_PIN7))
+	{
+		/* Check on the Required PORT Number */
+		switch (Copy_u8PORT)
+		{
+		case DIO_PORTA: * Copy_PtrData = GET_BIT(PINA_Register,Copy_u8PIN); break;
+		case DIO_PORTB: * Copy_PtrData = GET_BIT(PINB_Register,Copy_u8PIN); break;
+		case DIO_PORTC: * Copy_PtrData = GET_BIT(PINC_Register,Copy_u8PIN); break;
+		case DIO_PORTD: * Copy_PtrData = GET_BIT(PIND_Register,Copy_u8PIN); break;
+		}
+	}
+
+	else
+	{
+		/* in case of error in the Pin ID or PORT ID */
+		LOC_enumState = DIO_NOK ;
+	}
+
+	return LOC_enumState;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function Toggle the Value of the Pin
+ * Parameters :
+  	  =>Copy_u8PORT --> Port Name [ DIO_PORTA ,	DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+  	  =>Copy_u8PIN  --> Pin Number [ DIO_PIN0 , DIO_PIN1 , DIO_PIN2 , DIO_PIN3 , DIO_PIN4 , DIO_PIN5 , DIO_PIN6 , DIO_PIN7 ]
+ * return : its status
+ */
+DIO_ErrorStatus DIO_enumTogglePinValue  ( u8 Copy_u8PORT, u8 Copy_u8PIN )
+{
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if (Copy_u8PIN <= DIO_PIN7)
+	{
+		switch (Copy_u8PORT)
+		{
+		case DIO_PORTA : TOG_BIT(PORTA_Register,Copy_u8PIN);
+		break ;
+		case DIO_PORTB : TOG_BIT(PORTB_Register,Copy_u8PIN);
+		break ;
+		case DIO_PORTC : TOG_BIT(PORTC_Register,Copy_u8PIN);
+		break ;
+		case DIO_PORTD : TOG_BIT(PORTD_Register,Copy_u8PIN);
+		break ;
+		}
+
+	}
+	else
+	{
+		/* in case of error in the Pin ID or PORT ID */
+		LOC_enumState = DIO_NOK ;
+	}
+
+	return LOC_enumState;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function connected internal pull up
+ * Parameters :
+  	  =>Copy_u8PORT --> Port Name [ DIO_PORTA ,	DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+  	  =>Copy_u8PIN  --> Pin Number [ DIO_PIN0 , DIO_PIN1 , DIO_PIN2 , DIO_PIN3 , DIO_PIN4 , DIO_PIN5 , DIO_PIN6 , DIO_PIN7 ]
+ 	  =>Copy_u8ConnectPullup --> [DIO_PIN_HIGH , DIO_PIN_LOW ]
+ * return : its status
+ */
+DIO_ErrorStatus DIO_enumConnectPullup (u8 Copy_u8PORT ,u8 Copy_u8PIN, u8 Copy_u8ConnectPullup)
+{
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if ((Copy_u8PORT <= DIO_PORTD) && (Copy_u8PIN <= DIO_PIN7))
+	{
+		switch(Copy_u8PORT)
+		{
+		/* Connect or disconnect the pull up resistance to the given pin in port A */
+		case DIO_PORTA:
+			if(Copy_u8ConnectPullup==DIO_PIN_HIGH)
+			{
+				CLR_BIT(SFIOR,PUD);
+				CLR_BIT(DDRA_Register,Copy_u8PIN);
+				SET_BIT(PORTA_Register,Copy_u8PIN);
+			}
+			else
+			{
+				CLR_BIT(PORTA_Register,Copy_u8PIN);
+			}
+			break;
+			/* Connect or disconnect the pull up resistance to the given pin in port B */
+		case DIO_PORTB:
+			if(Copy_u8ConnectPullup==DIO_PIN_HIGH)
+			{
+				CLR_BIT(SFIOR,PUD);
+				CLR_BIT(DDRB_Register,Copy_u8PIN);
+				SET_BIT(PORTB_Register,Copy_u8PIN);
+			}
+			else
+			{
+				CLR_BIT(PORTB_Register,Copy_u8PIN);
+			}
+			break;
+			/* Connect or disconnect the pull up resistance to the given pin in port C */
+		case DIO_PORTC:
+			if(Copy_u8ConnectPullup==DIO_PIN_HIGH)
+			{
+				CLR_BIT(SFIOR,PUD);
+				CLR_BIT(DDRC_Register,Copy_u8PIN);
+				SET_BIT(PORTC_Register,Copy_u8PIN);
+			}
+			else
+			{
+				CLR_BIT(PORTC_Register,Copy_u8PIN);
+			}
+			break;
+			/* Connect or disconnect the pull up resistance to the given pin in port D */
+		case DIO_PORTD:
+			if(Copy_u8ConnectPullup==DIO_PIN_HIGH)
+			{
+				CLR_BIT(SFIOR,PUD);
+				CLR_BIT(DDRD_Register,Copy_u8PIN);
+				SET_BIT(PORTD_Register,Copy_u8PIN);
+			}
+			else
+			{
+				CLR_BIT(PORTD_Register,Copy_u8PIN);
+			}
+			break;
+		}
+	}
+
+	else
+	{
+		LOC_enumState = DIO_NOK ;
+	}
+
+	return LOC_enumState ;
+
+
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<                          IO PORTS                     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/*
+ * Breif : This Function Set the direction of the port (INPUT / OUTPUT)
+ * Parameters :
+ 	  =>Copy_u8PORT --> Port Name [ DIO_PORTA , DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+ 	  =>Copy_u8Direction  --> Port direction [ DIO_PORT_OUTPUT , DIO_PORT_INPUT ]
+ * return :  its status
+ */
+DIO_ErrorStatus DIO_enumSetPortDirection   (u8 Copy_u8PORT , u8 Copy_u8Direction ) 
+{
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if ( (Copy_u8PORT <= DIO_PORTD) )
+	{
+		/* Check on the Required PORT Number */
+		switch (Copy_u8PORT)
+		{
+		case     DIO_PORTA: DDRA_Register = Copy_u8Direction; break;
+		case     DIO_PORTB: DDRB_Register = Copy_u8Direction; break;
+		case     DIO_PORTC: DDRC_Register = Copy_u8Direction; break;
+		case     DIO_PORTD: DDRD_Register = Copy_u8Direction; break;
+		default: LOC_enumState =  DIO_NOK;    break;
+		}	
+	}
+	else
+	{
+		LOC_enumState = DIO_NOK;
+	}
+	return LOC_enumState ;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function Set value on Port
+ * Parameters :
+  	  =>Copy_u8PORT --> Port Name [ DIO_PORTA , DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+ 	  =>Copy_u8Value  --> The Value  [DIO_PORT_HIGH , DIO_PORT_LOW , Another Value]
+ * return : its status
+ */
+DIO_ErrorStatus DIO_enumSetPortValue       (u8 Copy_u8PORT , u8 Copy_u8Value )
+{
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if ( (Copy_u8PORT <= DIO_PORTD) && ( (Copy_u8Value<=255) || (Copy_u8Value==DIO_PORT_LOW) || (Copy_u8Value==DIO_PORT_HIGH) ) )
+	{
+		/* Check on the Required PORT Number */
+		switch (Copy_u8PORT)
+		{
+		case     DIO_PORTA: PORTA_Register = Copy_u8Value; break;
+		case     DIO_PORTB: PORTB_Register = Copy_u8Value; break;
+		case     DIO_PORTC: PORTC_Register = Copy_u8Value; break;
+		case     DIO_PORTD: PORTD_Register = Copy_u8Value; break;
+		default: LOC_enumState = DIO_NOK;       break;
+		}	
+	}
+	else
+	{
+		LOC_enumState = DIO_NOK;
+	}
+	return LOC_enumState ;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * Breif : This Function Toggle value on Port
+ * Parameters :
+ 	  =>Copy_u8PORT --> Port Name [ DIO_PORTA , DIO_PORTB , DIO_PORTC , DIO_PORTD ]
+ * return : its status
+ */
+DIO_ErrorStatus DIO_enumTogglePortValue      (u8 Copy_u8PORT                       )
+{
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if (Copy_u8PORT <= DIO_PORTD)
+	{
+		switch (Copy_u8PORT)
+		{
+		case DIO_PORTA : PORTA_Register = ~PORTA_Register ;
+		break ;
+		case DIO_PORTB : PORTB_Register = ~PORTB_Register ;
+		break ;
+		case DIO_PORTC : PORTC_Register = ~PORTC_Register ;
+		break ;
+		case DIO_PORTD : PORTD_Register = ~PORTD_Register ;
+		break ;
 		}
 	}
 	else
 	{
-		// No Code
+		LOC_enumState = DIO_NOK;
 	}
+	return LOC_enumState ;
 }
 
-#define GET_BIT(REG, BITNUM)   		((REG>>BITNUM)&0x01)
-#define TOGGLE_BIT(REG, BITNUM)		(REG ^=1<<BITNUM)
-#define SET_BYTE(REG, VALUE)		REG=VALUE
 
-#define CONC_BIT(b7,b6,b5,b4,b3,b2,b1,b0) 0b##b7##b6##b5##b4##b3##b2##b1##b0
- 
-/** Output Mode */
-void DIO_voidSetpinValue(u8 PortID,u8 PinID, u8 Value)
+DIO_ErrorStatus   DIO_enumGetPortValue         ( u8 Copy_u8PORT  , u8 * Copy_PtrData )
 {
-	
-	
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if ( (Copy_u8PORT <= DIO_PORTD))
+	{
+		switch (Copy_u8PORT)
+		{
+		case DIO_PORTA :
+			*Copy_PtrData = PINA_Register  ;
+			break ;
+		case DIO_PORTB :
+			*Copy_PtrData = PINB_Register  ;
+			break ;
+		case DIO_PORTC :
+			*Copy_PtrData = PINC_Register  ;
+			break ;
+		case DIO_PORTD :
+			*Copy_PtrData = PIND_Register  ;
+			break ;
+		default : LOC_enumState = DIO_NOK ;
+		break;
+		}
+	}
+	else
+	{
+		LOC_enumState = DIO_NOK;
+	}
+
+	return LOC_enumState ;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<                          IO NIBBLES                     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/** Input Mode*/
-u8 DIO_u8GetPinValue(u8 PortID, u8 PinID)
+
+DIO_ErrorStatus DIO_voidWriteHighNibbles(u8 Copy_u8PORT,u8 Copy_u8value)
 {
-	
+
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+	if ( (Copy_u8PORT <= DIO_PORTD))
+	{
+		Copy_u8value = (Copy_u8value<<4) ;
+		switch(Copy_u8PORT)
+		{
+		case DIO_PORTA :
+			PORTA_Register&=0x0f;                   // make sure the high bits = 0000
+			PORTA_Register|=Copy_u8value;			//Set only the high nibble of the port A by the given value
+			break ;
+		case DIO_PORTB:
+			PORTB_Register&=0x0f;                 //Set only the high nibble of the port B by the given value
+			PORTB_Register|=Copy_u8value;
+			break ;
+		case DIO_PORTC :
+			PORTC_Register&=0x0f;                 //Set only the high nibble of the port C by the given value
+			PORTC_Register|=Copy_u8value;
+			break ;
+		case DIO_PORTD:
+			PORTD_Register&=0x0f;                 //Set only the high nibble of the port D by the given value
+			PORTD_Register|=Copy_u8value;
+			break ;
+		default: break ;
+
+		}
+	}
+	else
+	{
+		LOC_enumState = DIO_NOK;
+	}
+
+	return LOC_enumState ;
+
 }
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-/** Output Mode */
-void DIO_voidTogglePin(u8 PortID, u8 PinID)
+DIO_ErrorStatus DIO_voidWriteLowNibbles(u8 Copy_u8PORT,u8 Copy_u8value)
 {
-	
+	DIO_ErrorStatus LOC_enumState = DIO_OK ;
+
+
+	if ( (Copy_u8PORT <= DIO_PORTD))
+	{
+		Copy_u8value&=0x0f;
+		switch(Copy_u8PORT)
+		{
+		case DIO_PORTA :
+			PORTA_Register &= 0xf0;                 //Set only the high nibble of the port A by the given value
+			PORTA_Register |= Copy_u8value;
+			break ;
+		case DIO_PORTB:
+			PORTB_Register &= 0xf0;                 //Set only the high nibble of the port B by the given value
+			PORTB_Register |= Copy_u8value;
+			break ;
+		case DIO_PORTC :
+			PORTC_Register &= 0xf0;                 //Set only the high nibble of the port C by the given value
+			PORTC_Register |= Copy_u8value;
+			break ;
+		case DIO_PORTD:
+			PORTD_Register &= 0xf0;                 //Set only the high nibble of the port D by the given value
+			PORTD_Register |= Copy_u8value;
+			break ;
+		default: break ;
+
+		}
+
+
+	}
+	else
+	{
+		LOC_enumState = DIO_NOK;
+	}
+
+	return LOC_enumState ;
+
 }
-/** output - input*/
-void DIO_voidSetPortDirection(u8 PortID, u8 Direction);
 
-
-/** High - Low*/
-void DIO_voidSetPortValue(u8 PortID, u8 Value);
