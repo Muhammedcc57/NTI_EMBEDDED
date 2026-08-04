@@ -35,19 +35,7 @@
 /***************************************************************************************/
 
 
-/*
 
- Options:-
- 	 1-DIO_PIN0
- 	 2-DIO_PIN1
- 	 3-DIO_PIN2
- 	 4-DIO_PIN3
- 	 5-DIO_PIN4
- 	 6-DIO_PIN5
- 	 7-DIO_PIN6
- 	 8-DIO_PIN7
-
- */
 #define CLCD_RS             DIO_PIN1
 #define CLCD_RW             DIO_PIN2
 #define CLCD_EN             DIO_PIN3
