@@ -19,7 +19,7 @@
 #include "CLCD_interface.h"
 #include "CLCD_private.h"
 #include "CLCD_config.h"
-#include "CLCD_extrachar.h"
+
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -266,45 +266,6 @@ void CLCD_voidSetPosition ( u8 Copy_u8Row , u8 Copy_u8Col ){
 
 }
 
-
-//----------------------------------------------------------------------------------------------------------------------------------------------------
-/*
-* Breif : This Function send extra char
-* Parameters :
-            => Copy_u8Row --> row number (CLCD_ROW_1 or CLCD_ROW_2)
-			=> Copy_u8Col --> column number (CLCD_COL_1 ... CLCD_COL_16)
-* return : nothing
-* Hint :-
-	Address Counter can refer to CGRAM and DDRAM
-*/
-void CLCD_voidSendExtraChar( u8 Copy_u8Row , u8 Copy_u8Col ){
-
-	u8 LOC_u8Iterator = 0 ;
-	/* 1- Go To CGRAM            */
-	CLCD_voidSendCommand( lcd_CGRAM );  // Make AC refers to the first Place/Address at CGRAM
-
-
-	/* 2- Draw Character in CGRAM        */
-	/* Hint : it will be copied to DDRAM automatically */
-	for( LOC_u8Iterator = 0 ; LOC_u8Iterator < sizeof(CLCD_u8ExtraChar) / sizeof(CLCD_u8ExtraChar[0]) ; LOC_u8Iterator++){
-
-		CLCD_voidSendData( CLCD_u8ExtraChar[LOC_u8Iterator] );
-
-	}
-
-
-	/* 3- Back (AC) To DDRAM          */
-	CLCD_voidSetPosition(Copy_u8Row,Copy_u8Col);
-
-
-	/* 4- Send Character Address */
-	for( LOC_u8Iterator = 0 ; LOC_u8Iterator < 8 ; LOC_u8Iterator++ ){
-
-		CLCD_voidSendData( LOC_u8Iterator );
-
-	}
-
-}
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------
 /*
