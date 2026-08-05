@@ -32,20 +32,6 @@ void KPD_Init(void){
 	DIO_enumConnectPullup        ( KPD_PORT , KPD_R2 , DIO_PIN_HIGH );
 	DIO_enumConnectPullup        ( KPD_PORT , KPD_R3 , DIO_PIN_HIGH );
 
-
-	/*        This code equivalent to connect pull up for the pins of the rows                  */
-
-	/*DIO_enumSetPinDirection( KPD_PORT , KPD_R0 , DIO_INPUT );
-	DIO_enumSetPinDirection( KPD_PORT , KPD_R1 , DIO_INPUT );
-	DIO_enumSetPinDirection( KPD_PORT , KPD_R2 , DIO_INPUT );
-	DIO_enumSetPinDirection( KPD_PORT , KPD_R3 , DIO_INPUT );
-
-	DIO_enumSetPinValue    ( KPD_PORT , KPD_R0 , DIO_HIGH );
-	DIO_enumSetPinValue    ( KPD_PORT , KPD_R1 , DIO_HIGH );
-	DIO_enumSetPinValue    ( KPD_PORT , KPD_R2 , DIO_HIGH );
-	DIO_enumSetPinValue    ( KPD_PORT , KPD_R3 , DIO_HIGH );*/
-
-
 	/*                 connect the pins of the columns as output pins (HIGH)                    */
 
 
@@ -61,7 +47,6 @@ void KPD_Init(void){
 
 }
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------
 /*
  * Breif : This Function used to get the pressed button of the kpd
  * return : the pressed button
