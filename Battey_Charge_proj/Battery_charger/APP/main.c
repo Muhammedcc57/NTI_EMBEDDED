@@ -3,21 +3,6 @@
  * File    : main.c
  * Project : Battery Charger Simulator
  * MCU     : ATmega32  |  F_CPU : 8MHz
- *
- * Drivers used (exact function names from your drivers):
- *   DIO  : DIO_voidSetPinDirection / DIO_voidSetPinValue / DIO_u8GetPinValue
- *   ADC  : ADC_voidInit / ADC_u16ReadChannel
- *   LCD  : LCD_voidInit / LCD_voidSendString / LCD_voidSendNumber
- *          LCD_voidGoToXY / LCD_voidClearScreen
- *   KPD  : KPD_voidInit / KPD_u8GetPressedKey
- *   EXTI : EXTI_voidInit / EXTI_voidEnable / EXTI_voidSetCallBack
- *   GIE  : GIE_VoidEnable
- *   TIM0 : TIM0_voidInit / TIM0_voidSetCTCReg / TIM0_voidCTCSetCallBack
- *          TIM0_voidEnableCTCInterrupt
- *
- * State Machine:  IDLE -> BULK -> ABSORPTION -> FLOAT -> COMPLETE
- * Alarms      :  Over-Voltage (>14.5V) | Over-Temperature (>45C)
- * EXTI        :  INT0 falling edge => emergency disconnect
  ******************************************************************************
  */
 
@@ -36,10 +21,7 @@
 #include "TIM0_int.h"
 
 /*============================================================================
- *  Hardware Pin Definitions
- *  NOTE: LCD uses PORTD (RS,RW,EN) + PORTC (D4-D7) from LCD_config.h
- *        KEYPAD uses PORTC (R0-R3 cols, C0-C3 rows) from keypad_confg.h
- *        => Use PORTB for our output pins to avoid conflict
+ * Pin Definitions
  *============================================================================*/
 #define CHARGER_PORT       PORTB
 #define CHARGER_PIN        PIN0    /* Relay: HIGH=charging ON   */
@@ -51,7 +33,7 @@
 #define COMPLETE_PIN       PIN2    /* LED  : HIGH=charge done   */
 
 /*============================================================================
- *  ADC Channel Assignments
+ *  ADC Channel
  *============================================================================*/
 #define BAT_VOLT_CH        ADC_CHANNEL0   /* PA0: battery voltage divider */
 #define BAT_TEMP_CH        ADC_CHANNEL1   /* PA1: LM35 temperature sensor */
@@ -165,9 +147,6 @@ static void LCD_PrintTemp(u16 Copy_u16ADC)
     LCD_voidSendString("C");
 }
 
-/*============================================================================
- *  Helper: print current state name on LCD row 0
- *============================================================================*/
 static void LCD_PrintState(void)
 {
     LCD_voidGoToXY(0, 0);
@@ -184,9 +163,6 @@ static void LCD_PrintState(void)
     }
 }
 
-/*============================================================================
- *  MAIN
- *============================================================================*/
 int main(void)
 {
     u16 batADC  = 0u;
@@ -271,13 +247,10 @@ int main(void)
     G_State = STATE_BULK;
     DIO_voidSetPinValue(CHARGER_PORT, CHARGER_PIN, HIGH);   /* Relay ON */
 
-    /*------------------------------------------------------------------------
-     *  Main Loop
-     *------------------------------------------------------------------------*/
     while (1)
     {
         /*--------------------------------------------------------------------
-         *  1) Check emergency disconnect flag (set by EXTI ISR)
+         *  1) Check emergency disconnect
          *--------------------------------------------------------------------*/
         if (G_DisconnectFlag == 1u)
         {
@@ -356,7 +329,6 @@ int main(void)
             /*----------------------------------------------------------------
              *  FLOAT: reduced voltage maintenance
              *  Trickle mode => stay here forever
-             *  Slow/Fast    => complete after FLOAT_TIME_S seconds
              *----------------------------------------------------------------*/
             case STATE_FLOAT:
                 if (G_ChargeMode != MODE_TRICKLE)
